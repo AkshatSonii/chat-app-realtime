@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const generateToken = require("../config/generateToken");
-
+const md5 = require("md5");
 
 const allUsers = asyncHandler(async (req, res) => {
   const keyword = req.query.search
@@ -33,26 +33,28 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("User already exists");
   }
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-    pic,
+  const newUser = new User({
+    name: name,
+    email : email,
+    password : md5(password),
+    pic : pic,
   });
 
-  if (user) {
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      pic: user.pic,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(400);
-    throw new Error("User not found");
-  }
+  try{
+        const savedUser = await newUser.save();
+        res.status(201).json({
+          _id: savedUser._id,
+          name: savedUser.name,
+          email: savedUser.email,
+          isAdmin: savedUser.isAdmin,
+          pic: savedUser.pic,
+          token: generateToken(savedUser._id),
+        });
+      
+    }
+    catch(err){
+        res.status(500).json(err);
+    }
 });
 
 
@@ -61,7 +63,7 @@ const authUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ email });
 
-  if (user && (await user.matchPassword(password))) {
+  if (user && user.password === md5(password)) {
     res.json({
       _id: user._id,
       name: user.name,
@@ -75,5 +77,6 @@ const authUser = asyncHandler(async (req, res) => {
     throw new Error("Invalid Email or Password");
   }
 });
+
 
 module.exports = { allUsers, registerUser, authUser };
