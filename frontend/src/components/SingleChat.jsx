@@ -1,3 +1,4 @@
+import { Button } from "@chakra-ui/button";
 import { FormControl } from "@chakra-ui/form-control";
 import { Input } from "@chakra-ui/input";
 import { Box, Text } from "@chakra-ui/layout";
@@ -11,6 +12,9 @@ import ProfileModal from "./miscellaneous/ProfileModal";
 import ScrollableChat from "./ScrollableChat";
 import Lottie from "react-lottie";
 import animationData from "../animations/typing.json";
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 
 import io from "socket.io-client";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
@@ -181,6 +185,33 @@ useEffect(() => {
     }, timerLength);
   };
 
+
+
+  // speech to text logic 
+  const [isListening, setIsListening] = useState(false);
+  const { finalTranscript, resetTranscript } = useSpeechRecognition();
+
+
+   useEffect(() => {
+    if (finalTranscript) {
+      setNewMessage(prevMessage => prevMessage + finalTranscript + ' '); // append recognized text to existing message
+      resetTranscript();
+    }
+  }, [finalTranscript, resetTranscript]);
+
+
+
+  const handleToggleListening = () => {
+    if (isListening) {
+      SpeechRecognition.stopListening();
+    } else {
+      SpeechRecognition.startListening({ continuous: true });
+    }
+    setIsListening(!isListening);
+  };
+
+  
+
   return (
     <>
       {selectedChat ? (
@@ -262,6 +293,8 @@ useEffect(() => {
               ) : (
                 <></>
               )}
+              <Box display={"flex"} alignItems={"center"}>
+
               <Input
                 variant="filled"
                 bg="#E0E0E0"
@@ -269,6 +302,8 @@ useEffect(() => {
                 value={newMessage}
                 onChange={typingHandler}
               />
+              {isListening ?  <RadioButtonCheckedIcon onClick={handleToggleListening} cursor={"pointer"} /> : <KeyboardVoiceIcon onClick={handleToggleListening} cursor={"pointer"}/>}
+              </Box>
             </FormControl>
           </Box>
         </>
