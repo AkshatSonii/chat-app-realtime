@@ -19,7 +19,7 @@ import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import io from "socket.io-client";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
 import { ChatState } from "../Context/ChatProvider";
-const ENDPOINT = "https://chatify-z15s.onrender.com"; 
+const ENDPOINT = "https://chatify-z15s.onrender.com";
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
@@ -125,42 +125,42 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     // eslint-disable-next-line
   }, [selectedChat]);
 
-//   useEffect(() => {
-//     socket.on("message recieved", (newMessageRecieved) => {
-//       if (
-//         !selectedChatCompare || // if chat is not selected or doesn't match current chat
-//         selectedChatCompare._id !== newMessageRecieved.chat._id
-//       ) {
-//         if (!notification.includes(newMessageRecieved)) {
-//           setNotification([newMessageRecieved, ...notification]);
-//           setFetchAgain(!fetchAgain);
-//         }
-//       } else {
-//         setMessages([...messages, newMessageRecieved]);
-//       }
-//     });
-//   });
+  //   useEffect(() => {
+  //     socket.on("message recieved", (newMessageRecieved) => {
+  //       if (
+  //         !selectedChatCompare || // if chat is not selected or doesn't match current chat
+  //         selectedChatCompare._id !== newMessageRecieved.chat._id
+  //       ) {
+  //         if (!notification.includes(newMessageRecieved)) {
+  //           setNotification([newMessageRecieved, ...notification]);
+  //           setFetchAgain(!fetchAgain);
+  //         }
+  //       } else {
+  //         setMessages([...messages, newMessageRecieved]);
+  //       }
+  //     });
+  //   });
 
-useEffect(() => {
-  socket.on("message recieved", (newMessageRecieved) => {
-    if (
-      !selectedChatCompare || // if chat is not selected or doesn't match current chat
-      selectedChatCompare._id !== newMessageRecieved.chat._id
-    ) {
-      if (!notification.includes(newMessageRecieved)) {
-        setNotification([newMessageRecieved, ...notification]);
-        setFetchAgain(!fetchAgain);
+  useEffect(() => {
+    socket.on("message recieved", (newMessageRecieved) => {
+      if (
+        !selectedChatCompare || // if chat is not selected or doesn't match current chat
+        selectedChatCompare._id !== newMessageRecieved.chat._id
+      ) {
+        if (!notification.includes(newMessageRecieved)) {
+          setNotification([newMessageRecieved, ...notification]);
+          setFetchAgain(!fetchAgain);
+        }
+      } else {
+        setMessages(prevMessages => [...prevMessages, newMessageRecieved]);
       }
-    } else {
-      setMessages(prevMessages => [...prevMessages, newMessageRecieved]);
-    }
-  });
-  
-  // Clean up the event listener when the component unmounts
-  return () => {
-    socket.off("message recieved");
-  };
-}, [selectedChatCompare, notification, fetchAgain]);
+    });
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      socket.off("message recieved");
+    };
+  }, [selectedChatCompare, notification, fetchAgain]);
 
 
   const typingHandler = (e) => {
@@ -191,7 +191,7 @@ useEffect(() => {
   const { finalTranscript, resetTranscript } = useSpeechRecognition();
 
 
-   useEffect(() => {
+  useEffect(() => {
     if (finalTranscript) {
       setNewMessage(prevMessage => prevMessage + finalTranscript + ' '); // append recognized text to existing message
       resetTranscript();
@@ -209,7 +209,7 @@ useEffect(() => {
     setIsListening(!isListening);
   };
 
-  
+
 
   return (
     <>
@@ -294,14 +294,14 @@ useEffect(() => {
               )}
               <Box display={"flex"} alignItems={"center"}>
 
-              <Input
-                variant="filled"
-                bg="#E0E0E0"
-                placeholder="Enter a message.."
-                value={newMessage}
-                onChange={typingHandler}
-              />
-              {isListening ?  <RadioButtonCheckedIcon onClick={handleToggleListening} cursor={"pointer"} /> : <KeyboardVoiceIcon onClick={handleToggleListening} cursor={"pointer"}/>}
+                <Input
+                  variant="filled"
+                  bg="#E0E0E0"
+                  placeholder="Enter a message.."
+                  value={newMessage}
+                  onChange={typingHandler}
+                />
+                {isListening ? <RadioButtonCheckedIcon onClick={handleToggleListening} cursor={"pointer"} /> : <KeyboardVoiceIcon onClick={handleToggleListening} cursor={"pointer"} />}
               </Box>
             </FormControl>
           </Box>

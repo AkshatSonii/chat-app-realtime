@@ -84,39 +84,11 @@ const Signup = () => {
     }
   };
 
-  const postDetails = (pics) => {
+  const postDetails = async (pics) => {
     setPicLoading(true);
-    if (pics === undefined) {
-      toast({
-        title: "Please Select an Image!",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom",
-      });
-      return;
-    }
-    console.log(pics);
-    if (pics.type === "image/jpeg" || pics.type === "image/png") {
-      const data = new FormData();
-      data.append("file", pics);
-      data.append("upload_preset", "chat-app");
-      data.append("cloud_name", "dnxoljv9j");
-      fetch("https://api.cloudinary.com/v1_1/dnxoljv9j/image/upload", {
-        method: "post",
-        body: data,
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setPic(data.url.toString());
-          console.log(data.url.toString());
-          setPicLoading(false);
-        })
-        .catch((err) => {
-          console.log(err);
-          setPicLoading(false);
-        });
-    } else {
+
+    // Check if no image is selected
+    if (!pics) {
       toast({
         title: "Please Select an Image!",
         status: "warning",
@@ -127,7 +99,73 @@ const Signup = () => {
       setPicLoading(false);
       return;
     }
+
+    // Check for valid image type
+    if (pics.type === "image/jpeg" || pics.type === "image/png") {
+      const fileName = pics.name;
+      const fileType = pics.type;
+
+      try {
+        const config = {
+          headers: {
+            "Content-type": "application/json",
+          },
+        };
+        // Request pre-signed URL for the upload
+        const response = await axios.post("https://chatify-z15s.onrender.com/api/s3/generate-presigned-url", {
+          fileName,
+          fileType,
+        }, config);
+
+        const { url, filePath } = response.data;
+
+        // Upload the image to S3 using the pre-signed URL
+        await axios.put(url, pics, {
+          headers: {
+            "Content-Type": fileType,
+          },
+        });
+
+        // Construct the full S3 URL for the uploaded image
+        const s3Url = `https://chatify-akshat.s3.eu-north-1.amazonaws.com/${filePath}`;
+        setPic(s3Url);
+        console.log(s3Url);
+
+        toast({
+          title: "Image uploaded successfully!",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "bottom",
+        });
+
+      } catch (error) {
+        console.error("Error during upload:", error);
+        toast({
+          title: "Upload Failed",
+          description: error.message || "Something went wrong!",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      } finally {
+        setPicLoading(false);
+      }
+
+    } else {
+      // If the file type is invalid
+      toast({
+        title: "Please Select a Valid Image!",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setPicLoading(false);
+    }
   };
+
 
   return (
     <VStack spacing="5px">
